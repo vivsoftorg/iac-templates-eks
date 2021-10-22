@@ -72,3 +72,18 @@ module "eks" {
   wait_for_cluster_timeout                           = var.wait_for_cluster_timeout
   openid_connect_audiences                           = var.openid_connect_audiences
 }
+
+data "aws_eks_cluster" "eks" {
+  name = module.eks.cluster_id
+}
+
+data "aws_eks_cluster_auth" "eks" {
+  name = module.eks.cluster_id
+}
+
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.eks.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.eks.token
+}
