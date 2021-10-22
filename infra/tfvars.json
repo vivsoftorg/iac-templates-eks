@@ -1,11 +1,8 @@
 {
-    "cluster_name": "frezbo",
+    "cluster_name": "",
     "cluster_version": "1.21",
-    "subnets": [
-        "subnet-011fefb195fee9195",
-        "subnet-0898855ffca68ee00"
-    ],
-    "vpc_id": "vpc-002b8b835c9151fd6",
+    "subnets": [],
+    "vpc_id": "",
     "worker_groups": [
         {
             "instance_type": "t3.medium",
