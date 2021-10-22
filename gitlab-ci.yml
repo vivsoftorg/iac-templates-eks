@@ -1,5 +1,8 @@
 image: 
   name: registry.gitlab.com/enbuild-staging/hardened-gitlab-runner:latest
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_MESSAGE =~ /.*run-ci.*/i
 variables:
   TF_ROOT: ${CI_PROJECT_DIR}/infra
   TF_STATE_NAME: eks
