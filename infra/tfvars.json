@@ -3,7 +3,6 @@
     "create_vpc": true,
     "//": "provide the subnet_ids  and vpc_cidr if you dont want to create the vpc and set the create_vpc to false",
     "vpc_cidr": "10.0.0.0/16",
-    "cluster_name": "juned-eks",
     "cluster_version": "1.25",
     "cluster_endpoint_public_access": true,
     "cluster_endpoint_private_access": false,
