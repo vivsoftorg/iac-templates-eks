@@ -150,14 +150,14 @@ module "eks" {
 }
 
 
-resource "null_resource" "generate_kubeconfig" {
-  triggers = {
-    eks_cluster_id = module.eks.cluster_id
-  }
+// resource "null_resource" "generate_kubeconfig" {
+//   triggers = {
+//     eks_cluster_id = module.eks.cluster_id
+//   }
 
-  provisioner "local-exec" {
-    command = <<-EOT
-      aws eks update-kubeconfig --name ${module.eks.cluster_name}  --kubeconfig kubeconfig.yaml
-    EOT
-  }
-}
+//   provisioner "local-exec" {
+//     command = <<-EOT
+//       aws eks update-kubeconfig --name ${module.eks.cluster_name}  --kubeconfig kubeconfig.yaml
+//     EOT
+//   }
+// }
