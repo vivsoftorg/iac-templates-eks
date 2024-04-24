@@ -1,3 +1,15 @@
+resource "null_resource" "validation" {
+  count = local.validation_error ? 1 : 0
+
+  triggers = {
+    error_message = "If create_registry1_mirror is true, then registry1_mirror_proxy_address must be non-empty."
+  }
+
+  provisioner "local-exec" {
+    command = "exit 1"
+  }
+}
+
 resource "aws_iam_policy" "sops" {
   name   = "${local.name}-kms"
   policy = data.aws_iam_policy_document.sops.json
@@ -72,7 +84,7 @@ module "eks" {
       capacity_type              = "ON_DEMAND"
       key_name                   = aws_key_pair.eks-node.key_name
       enable_bootstrap_user_data = false
-      pre_bootstrap_user_data    = var.create_registry1_mirror ? local.mirror_proxy_config : ""
+      pre_bootstrap_user_data    = local.mirror_proxy_config
 
       # Needed by the aws-ebs-csi-driver and BigBang 
       iam_role_additional_policies = {
