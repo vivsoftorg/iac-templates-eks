@@ -43,5 +43,5 @@ variable "create_registry1_mirror" {
 variable "registry1_mirror_proxy_address" {
   description = "The address of the registry1 mirror proxy, if the registry1 mirror is enabled by setting the create_registry1_mirror"
   type        = string
-  default     = ""
+  default     = "http://44.210.192.97:5000"
 }
