@@ -18,6 +18,6 @@ inputs = {
   single_nat_gateway              = true
   instance_types                  = ["t3.large"]
   // if you want to setup a mirror for https://registry1.dso.mil container registry, set the following variables
-  create_registry1_mirror = true
+  create_registry1_mirror = false
   // registry1_mirror_proxy_address  = "http://44.210.192.97:5000"
 }
