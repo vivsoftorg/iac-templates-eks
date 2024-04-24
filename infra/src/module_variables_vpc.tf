@@ -14,12 +14,6 @@ variable "name" {
   default     = ""
 }
 
-variable "vpc_cidr" {
-  description = "(Optional) The IPv4 CIDR block for the VPC. CIDR can be explicitly set or it can be derived from IPAM using `ipv4_netmask_length` & `ipv4_ipam_pool_id`"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
 variable "secondary_cidr_blocks" {
   description = "List of secondary CIDR blocks to associate with the VPC to extend the IP Address pool"
   type        = list(string)
@@ -411,8 +405,6 @@ variable "private_outbound_acl_rules" {
     },
   ]
 }
-
-
 
 variable "private_acl_tags" {
   description = "Additional tags for the private subnets network ACL"
@@ -1481,7 +1473,7 @@ variable "flow_log_traffic_type" {
 }
 
 variable "flow_log_destination_type" {
-  description = "Type of flow log destination. Can be s3 or cloud-watch-logs"
+  description = "Type of flow log destination. Can be s3, kinesis-data-firehose or cloud-watch-logs"
   type        = string
   default     = "cloud-watch-logs"
 }
@@ -1496,6 +1488,12 @@ variable "flow_log_destination_arn" {
   description = "The ARN of the CloudWatch log group or S3 bucket where VPC Flow Logs will be pushed. If this ARN is a S3 bucket the appropriate permissions need to be set on that bucket's policy. When create_flow_log_cloudwatch_log_group is set to false this argument must be provided"
   type        = string
   default     = ""
+}
+
+variable "flow_log_deliver_cross_account_role" {
+  description = "(Optional) ARN of the IAM role that allows Amazon EC2 to publish flow logs across accounts."
+  type        = string
+  default     = null
 }
 
 variable "flow_log_file_format" {
@@ -1564,6 +1562,18 @@ variable "flow_log_cloudwatch_log_group_retention_in_days" {
 
 variable "flow_log_cloudwatch_log_group_kms_key_id" {
   description = "The ARN of the KMS Key to use when encrypting log data for VPC flow logs"
+  type        = string
+  default     = null
+}
+
+variable "flow_log_cloudwatch_log_group_skip_destroy" {
+  description = " Set to true if you do not wish the log group (and any logs it may contain) to be deleted at destroy time, and instead just remove the log group from the Terraform state"
+  type        = bool
+  default     = false
+}
+
+variable "flow_log_cloudwatch_log_group_class" {
+  description = "Specified the log class of the log group. Possible values are: STANDARD or INFREQUENT_ACCESS"
   type        = string
   default     = null
 }
