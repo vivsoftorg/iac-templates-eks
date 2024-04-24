@@ -13,7 +13,7 @@ locals {
   username         = regex("user/([^/]+)$", data.aws_caller_identity.current.arn)
   tags             = merge(var.tags, { "Owner" = local.username[0] })
   mirror_config = {
-    mirorr     = <<-EOT
+    mirror     = <<-EOT
         mkdir -p /etc/containerd/certs.d/registry1.dso.mil
         echo -ne 'server = "https://registry1.dso.mil"\n[host."${var.registry1_mirror_proxy_address}"]\n  capabilities = ["pull", "resolve"]\n  skip_verify = true' > /etc/containerd/certs.d/registry1.dso.mil/hosts.toml
       EOT
@@ -22,7 +22,7 @@ locals {
       EOT
   }
 
-  mirror_proxy_config = var.create_registry1_mirror ? local.mirror_config.mirorr : local.mirror_config.non_mirror
+  mirror_proxy_config = var.create_registry1_mirror ? local.mirror_config.mirror : local.mirror_config.non_mirror
 
 }
 data "aws_iam_policy" "ebs_csi" {
