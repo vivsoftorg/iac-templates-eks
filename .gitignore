@@ -2,6 +2,7 @@
 *.tfstate
 *.tfstate.*
 infra/backend.tf
+infra/src/terraform.tfvars
 **/**.terraform.lock.hcl
 crash.log
 override.tf
