@@ -12,7 +12,6 @@ locals {
   database_subnets = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 8, k + 200)]
   username         = regex("user/([^/]+)$", data.aws_caller_identity.current.arn)
   tags             = merge(var.tags, { "Owner" = local.username[0] })
-  validation_error = var.create_registry1_mirror && (var.registry1_mirror_proxy_address == "" || length(trimspace(var.registry1_mirror_proxy_address)) == 0)
   mirror_config = {
     mirorr     = <<-EOT
         mkdir -p /etc/containerd/certs.d/registry1.dso.mil

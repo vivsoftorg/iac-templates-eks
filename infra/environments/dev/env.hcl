@@ -7,7 +7,7 @@ inputs = {
   // vpc_id  = "vpc-39b8da44"
   // subnet_ids = ["subnet-1242491c", "subnet-5817463e"]
 
-  cluster_name                    = "enbuild-eks"
+  cluster_name                    = "dev-enbuild-eks"
   cluster_version                 = "1.29"
   cluster_endpoint_public_access  = true
   cluster_endpoint_private_access = false
@@ -18,6 +18,6 @@ inputs = {
   single_nat_gateway              = true
   instance_types                  = ["t3.large"]
   // if you want to setup a mirror for https://registry1.dso.mil container registry, set the following variables
-  create_registry1_mirror = false
+  create_registry1_mirror = true
   // registry1_mirror_proxy_address  = "http://44.210.192.97:5000"
 }

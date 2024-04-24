@@ -4,7 +4,7 @@ locals {
   stack_name   = lower(replace(local.stack, "_", "-"))
   environment  = replace(path_relative_to_include(), "environments/", "")
   default_vars = read_terragrunt_config(find_in_parent_folders("tfvars.hcl", "tfvars.hcl"), { inputs = {} })
-  env_vars     = read_terragrunt_config(find_in_parent_folders("env.json", "env.json"), { inputs = {} })
+  env_vars     = read_terragrunt_config(find_in_parent_folders("env.hcl", "env.hcl"), { inputs = {} })
 }
 
 remote_state {
