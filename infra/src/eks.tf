@@ -1,15 +1,3 @@
-resource "null_resource" "validation" {
-  count = local.validation_error ? 1 : 0
-
-  triggers = {
-    error_message = "If create_registry1_mirror is true, then registry1_mirror_proxy_address must be non-empty."
-  }
-
-  provisioner "local-exec" {
-    command = "exit 1"
-  }
-}
-
 resource "aws_iam_policy" "sops" {
   name   = "${local.name}-kms"
   policy = data.aws_iam_policy_document.sops.json
