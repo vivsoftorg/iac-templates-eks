@@ -2,7 +2,7 @@ name: "Infra Destroy"
 on:
   workflow_dispatch:
 env:
-  tf_version: "1.2.6"
+  tf_version: "1.5.7"
   tg_version: "latest"
 
 jobs:

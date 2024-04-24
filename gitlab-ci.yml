@@ -1,5 +1,5 @@
 image: 
-  name: registry.gitlab.com/enbuild-staging/hardened-gitlab-runner:latest
+  name: registry.gitlab.com/enbuild-staging/hardened-gitlab-runner:v3
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_MESSAGE =~ /.*run-ci.*/i
