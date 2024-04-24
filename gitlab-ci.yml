@@ -4,7 +4,7 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_MESSAGE =~ /.*run-ci.*/i
 variables:
-  TF_ROOT: ${CI_PROJECT_DIR}/infra
+  TF_ROOT: ${CI_PROJECT_DIR}/infra/src/
   TF_STATE_NAME: eks
 cache:
   key: production
