@@ -1,0 +1,81 @@
+image: 
+  name: registry.gitlab.com/enbuild-staging/hardened-gitlab-runner:latest
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_MESSAGE =~ /.*run-ci.*/i
+variables:
+  TF_ROOT: ${CI_PROJECT_DIR}/infra
+  TF_STATE_NAME: eks
+cache:
+  key: production
+  paths:
+    - ${TF_ROOT}/.terraform
+
+before_script:
+  - cd ${TF_ROOT}
+
+stages:
+  - init
+  - validate
+  - plan
+  - deploy
+  - destroy
+
+init:
+  stage: init
+  only:
+    - main
+    - merge_requests
+  script:
+    - echo -ne "terraform {\n\tbackend "http" {\n\t}\n}" > backend.tf
+    - gitlab-terraform init
+
+validate:
+  stage: validate
+  only:
+    - main
+    - merge_requests
+  script:
+    - gitlab-terraform validate
+
+plan:
+  stage: plan
+  only:
+    - main
+    - merge_requests
+  script:
+    - gitlab-terraform plan -var-file tfvars.hcl
+    - gitlab-terraform plan-json
+  artifacts:
+    name: plan
+    paths:
+      - ${TF_ROOT}/plan.cache
+    reports:
+      terraform: ${TF_ROOT}/plan.json
+
+deploy:
+  only:
+    - main
+  stage: deploy
+  environment:
+    name: production
+  script:
+    - gitlab-terraform apply
+  dependencies:
+    - plan
+  artifacts:
+    paths:
+      - ${TF_ROOT}/kubeconfig.yaml
+    expire_in: never
+
+destroy:
+  only:
+    - main
+  stage: destroy
+  environment:
+    name: production
+  script:
+    - gitlab-terraform destroy -var-file tfvars.hcl
+  dependencies:
+    - plan
+  when: manual
