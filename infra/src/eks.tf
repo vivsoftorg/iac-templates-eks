@@ -35,7 +35,7 @@ resource "local_file" "pem" {
 }
 
 resource "aws_key_pair" "eks-node" {
-  key_name   = "eks-node-key"
+  key_name   = "${local.name}-eks-node-key"
   public_key = tls_private_key.ssh.public_key_openssh
 }
 
