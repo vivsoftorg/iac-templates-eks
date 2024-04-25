@@ -34,6 +34,12 @@ variable "tags" {
   default     = {}
 }
 
+variable "create_kubeconfig" {
+  description = "Should we create a kubeconfig file"
+  type        = bool
+  default     = false
+}
+
 variable "create_registry1_mirror" {
   description = "Should we add the registry1 mirror to the EKS cluster nodes"
   type        = bool

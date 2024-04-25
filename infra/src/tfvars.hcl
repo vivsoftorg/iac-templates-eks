@@ -15,6 +15,7 @@ eks_node_groups_max_size        = 5
 eks_node_groups_desired_size    = 1
 enable_nat_gateway              = true
 single_nat_gateway              = true
+create_kubeconfig               = true
 instance_types                  = ["t3.large"]
 // if you want to setup a mirror for https://registry1.dso.mil container registry, set the following variables
 create_registry1_mirror        = false

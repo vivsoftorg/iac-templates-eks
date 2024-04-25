@@ -3,11 +3,8 @@ inputs = {
   vpc_cidr   = "10.0.0.0/16"
 
   // if you don't want to create a new VPC, provide the vpc_id and subnet_ids and set create_vpc to false
-  // create_vpc = false
   // vpc_id  = "vpc-39b8da44"
   // subnet_ids = ["subnet-1242491c", "subnet-5817463e"]
-
-  cluster_name                    = "enbuild-eks"
   cluster_version                 = "1.29"
   cluster_endpoint_public_access  = true
   cluster_endpoint_private_access = false

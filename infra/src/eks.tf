@@ -183,6 +183,7 @@ module "eks" {
 
 
 resource "null_resource" "generate_kubeconfig" {
+  count = var.create_kubeconfig ? 1 : 0
   triggers = {
     eks_cluster_id = module.eks.cluster_id
   }
