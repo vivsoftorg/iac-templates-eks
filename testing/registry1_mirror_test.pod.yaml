@@ -8,9 +8,10 @@ metadata:
 spec:
   containers:
   - image: registry1.dso.mil/ironbank/redhat/ubi/ubi9:9.3
-    name: registry1_mirror_test
+    name: mirror-test
     resources: {}
     imagePullPolicy: Always
+    command: ["sleep", "3600"]
   dnsPolicy: ClusterFirst
   restartPolicy: Always
   # imagePullSecrets:
