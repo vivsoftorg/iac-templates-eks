@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: test
+  name: test
+spec:
+  containers:
+  - image: registry1.dso.mil/ironbank/redhat/ubi/ubi9:9.3
+    name: registry1_mirror_test
+    resources: {}
+    imagePullPolicy: Always
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  # imagePullSecrets:
+  # - name: private-registry
