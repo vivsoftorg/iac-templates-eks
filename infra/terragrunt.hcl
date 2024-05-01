@@ -11,7 +11,7 @@ remote_state {
   backend = "s3"
   generate = {
     path      = "backend.tf"
-    if_exists = "overwrite_terragrunt"
+    if_exists = "overwrite"
   }
   config = {
     bucket  = "${local.stack_name}-${local.aws_region}-${get_aws_account_id()}-tfstate"

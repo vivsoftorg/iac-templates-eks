@@ -10,42 +10,34 @@ cache:
   key: production
   paths:
     - ${TF_ROOT}/.terraform
-
 before_script:
   - cd ${TF_ROOT}
-
 stages:
   - init
   - validate
   - plan
   - deploy
   - destroy
-
 init:
   stage: init
   only:
     - main
     - merge_requests
   script:
-    - echo -ne "terraform {\n\tbackend "http" {\n\t}\n}" > ${TF_ROOT}/backend.tf
     - gitlab-terraform init
-
 validate:
   stage: validate
   only:
     - main
     - merge_requests
   script:
-    - echo -ne "terraform {\n\tbackend "http" {\n\t}\n}" > ${TF_ROOT}/backend.tf
     - gitlab-terraform validate
-
 plan:
   stage: plan
   only:
     - main
     - merge_requests
   script:
-    - echo -ne "terraform {\n\tbackend "http" {\n\t}\n}" > ${TF_ROOT}/backend.tf
     - gitlab-terraform plan -var-file tfvars.hcl
     - gitlab-terraform plan-json
   artifacts:
@@ -54,7 +46,6 @@ plan:
       - ${TF_ROOT}/plan.cache
     reports:
       terraform: ${TF_ROOT}/plan.json
-
 deploy:
   only:
     - main
@@ -62,7 +53,6 @@ deploy:
   environment:
     name: production
   script:
-    - echo -ne "terraform {\n\tbackend "http" {\n\t}\n}" > ${TF_ROOT}/backend.tf
     - gitlab-terraform apply
   dependencies:
     - plan
@@ -70,7 +60,6 @@ deploy:
     paths:
       - ${TF_ROOT}/target/kubeconfig.yaml
     expire_in: never
-
 destroy:
   only:
     - main
@@ -78,7 +67,6 @@ destroy:
   environment:
     name: production
   script:
-    - echo -ne "terraform {\n\tbackend "http" {\n\t}\n}" > ${TF_ROOT}/backend.tf
     - gitlab-terraform destroy -var-file tfvars.hcl
   dependencies:
     - plan
