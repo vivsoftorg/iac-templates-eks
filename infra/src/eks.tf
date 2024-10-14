@@ -40,9 +40,9 @@ resource "aws_key_pair" "eks-node" {
 }
 
 module "eks" {
-  source = "./modules/terraform-aws-eks"
+  source = "./modules/terraform-aws-eks-20.24.3"
   // source  = "terraform-aws-modules/eks/aws"
-  // version = "20.8.5"
+  // version = "20.24.3"
 
   subnet_ids = var.create_vpc ? module.vpc[0].private_subnets : var.subnet_ids
   vpc_id     = var.create_vpc ? module.vpc[0].vpc_id : var.vpc_id

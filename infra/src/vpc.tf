@@ -2,9 +2,9 @@ module "vpc" {
   count  = var.create_vpc ? 1 : 0
   azs    = local.azs
   name   = var.cluster_name
-  source = "./modules/terraform-aws-vpc"
+  source = "./modules/terraform-aws-vpc-5.13.0"
   // source  = "terraform-aws-modules/vpc/aws"
-  // version = "v5.7.1"
+  // version = "v5.13.0"
 
   public_subnet_tags = {
     "kubernetes.io/cluster/${local.name}" = "shared"
