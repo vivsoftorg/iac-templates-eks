@@ -4,7 +4,7 @@ This is the ENBUILD EKS catalog to deploy an Amazon EKS cluster utilizing the ve
 
 ```
   // source  = "terraform-aws-modules/eks/aws"
-  // version = "20.8.5"
+  // version = "20.24.3"
 
 ```
 
