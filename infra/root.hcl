@@ -26,7 +26,7 @@ remote_state {
     key            = "infra/${local.environment}/terraform.tfstate"
     region         = local.aws_region
     encrypt        = true
-    dynamodb_table = "${local.stack_name}-${local.aws_region}-${get_aws_account_id()}-tfstate-lock"
+    # dynamodb_table = "${local.stack_name}-${local.aws_region}-${get_aws_account_id()}-tfstate-lock"
   }
 }
 
