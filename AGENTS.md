@@ -25,7 +25,7 @@ This is a **template repository** that provisions an AWS EKS cluster using Terra
 | `infra/src/module_variables_eks.tf` | Variable declarations that map to the EKS module inputs |
 | `infra/src/module_variables_vpc.tf` | Variable declarations that map to the VPC module inputs |
 | `infra/src/outputs.tf` | Stack outputs (vpc, eks, sops config, kubectl command) |
-| `infra/src/backend.tf` | HTTP backend for GitLab remote state |
+| `infra/src/backend.tf` | HTTP backend for GitLab remote state + `required_providers` declarations |
 | `infra/root.hcl` | Terragrunt root config — reads `default.json` + `env.json`, generates S3 backend |
 | `infra/default.json` | Default input values shared by all environments |
 | `infra/environments/dev/env.json` | Dev-specific input overrides |

@@ -14,4 +14,4 @@ main | master) branch="prod" ;;
     fi
     ;;
 esac
-echo $branch
+printf "%s" "$branch"

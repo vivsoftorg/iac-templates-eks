@@ -1,8 +1,14 @@
 SHELL := /bin/bash # Use bash syntax
-BRANCH := $(shell ./scripts/get_git_branch.sh)
-ENVIRONMENT ?= $(BRANCH) # Set the ENVIRONMENT Variable only if its not set already
+BRANCH     := $(shell ./scripts/get_git_branch.sh | xargs)
+ENVIRONMENT ?= $(strip $(BRANCH)) # Set the ENVIRONMENT variable only if it's not already set
 
+# Use STACK_NAME env variable if set, otherwise derive from the current directory name
+STACK_NAME ?= $(shell echo $${STACK_NAME:-$$(basename $(CURDIR))})
 
+# # S3 backend coordinates (Terragrunt auto-creates these from root.hcl — override only if needed)
+# TF_KEY          := infra/$(strip $(ENVIRONMENT))/terraform.tfstate
+# S3_BUCKET       ?= $(STACK_NAME)-$(AWS_DEFAULT_REGION)-tfstate
+# DYNAMODB_TABLE  ?= $(STACK_NAME)-$(AWS_DEFAULT_REGION)-tfstate-lock
 
 default: fmt
 
@@ -13,23 +19,29 @@ fmt:
 set_env:
 	./scripts/set_env.sh .envrc
 
-init: set_env
-	source .envrc && terragrunt init --terragrunt-working-dir infra/environments/${ENVIRONMENT}/
+# Terragrunt auto-creates the S3 bucket and DynamoDB lock table via root.hcl.
+# This target ensures AWS credentials are set before any remote operations.
+create_backend: set_env
+
+init: create_backend
+	cd infra/environments/$(ENVIRONMENT) && source $(CURDIR)/.envrc && terragrunt init -reconfigure
 
 plan: init
-	source .envrc && terragrunt plan --terragrunt-working-dir infra/environments/${ENVIRONMENT}/
+	cd infra/environments/$(ENVIRONMENT) && source $(CURDIR)/.envrc && terragrunt plan
 
 apply: init
-	source .envrc && terragrunt apply -auto-approve --terragrunt-working-dir infra/environments/${ENVIRONMENT}/
+	cd infra/environments/$(ENVIRONMENT) && source $(CURDIR)/.envrc && terragrunt apply -auto-approve
 
-output:
-	source .envrc && terragrunt output --terragrunt-working-dir infra/environments/${ENVIRONMENT}/
+output: apply
+	cd infra/environments/$(ENVIRONMENT) && source $(CURDIR)/.envrc && terragrunt output
 
-destroy:
-	source .envrc && terragrunt destroy -auto-approve --terragrunt-working-dir infra/environments/${ENVIRONMENT}/
+destroy: init
+	cd infra/environments/$(ENVIRONMENT) && source $(CURDIR)/.envrc && terragrunt destroy -auto-approve
 
-build-push-image:
-	source .envrc && ./scripts/build_image.sh ${ENVIRONMENT}
+# Empties and removes the Terraform state bucket — use with extreme caution.
+delete_backend: destroy
+	source .envrc && aws s3 rb s3://$(S3_BUCKET) --force && \
+	aws dynamodb delete-table --table-name $(DYNAMODB_TABLE) --region $(AWS_DEFAULT_REGION)
 
 deploy:
 	source .envrc && terragrunt run-all apply --terragrunt-non-interactive
