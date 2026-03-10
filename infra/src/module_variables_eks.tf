@@ -148,7 +148,7 @@ variable "cluster_service_ipv6_cidr" {
 variable "outpost_config" {
   description = "Configuration for the AWS Outpost to provision the cluster on"
   type        = any
-  default     = {}
+  default     = null
 }
 
 variable "cluster_encryption_config" {
