@@ -36,7 +36,7 @@ jobs:
       - name: Set environment variables
         run: |
           REF="${{ github.ref }}"
-          
+
           # Determine environment and working directory from branch
           if [[ "$REF" == "refs/heads/dev" ]]; then
             echo "tf_working_dir=infra/environments/dev" >> $GITHUB_ENV
@@ -61,7 +61,7 @@ jobs:
         uses: gruntwork-io/terragrunt-action@v3
         with:
           tg_version: ${{ env.tg_version }}
-          tg_command: "hclfmt --check"
+          tg_command: "hcl fmt --check"
           tg_dir: ${{ env.tf_working_dir }}
           tg_comment: "0"
         env:
