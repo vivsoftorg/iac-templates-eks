@@ -61,12 +61,24 @@ jobs:
         uses: gruntwork-io/terragrunt-action@v3
         with:
           tg_version: ${{ env.tg_version }}
-          tg_command: "hcl fmt --check"
+          tg_command: "hclfmt --check"
           tg_dir: ${{ env.tf_working_dir }}
           tg_comment: "0"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Terragrunt backend bootstrap
+        uses: gruntwork-io/terragrunt-action@v3
+        with:
+          tg_version: ${{ env.tg_version }}
+          tg_command: "backend bootstrap --non-interactive"
+          tg_dir: ${{ env.tf_working_dir }}
+          tg_comment: "0"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          STACK_NAME: ${{ env.STACK_NAME }}
 
       - name: Terragrunt Init
         uses: gruntwork-io/terragrunt-action@v3
