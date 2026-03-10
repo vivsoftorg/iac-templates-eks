@@ -1,73 +1,114 @@
-image: 
-  name: registry.gitlab.com/enbuild-staging/hardened-gitlab-runner:v3
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_MESSAGE =~ /.*run-ci.*/i
+image:
+  name: hashicorp/terraform:1.9
+  entrypoint: [""]
+
 variables:
-  TF_ROOT: ${CI_PROJECT_DIR}/infra/src/
+  TF_ROOT: ${CI_PROJECT_DIR}/infra/src
   TF_STATE_NAME: eks
+
+  # GitLab remote state configuration
+  TF_HTTP_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}
+  TF_HTTP_LOCK_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock
+  TF_HTTP_UNLOCK_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock
+
+  TF_HTTP_LOCK_METHOD: POST
+  TF_HTTP_UNLOCK_METHOD: DELETE
+
+  TF_HTTP_USERNAME: gitlab-ci-token
+  TF_HTTP_PASSWORD: ${CI_JOB_TOKEN}
+
 cache:
-  key: production
+  key: terraform-${CI_COMMIT_REF_SLUG}
   paths:
     - ${TF_ROOT}/.terraform
-before_script:
-  - cd ${TF_ROOT}
+
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_MESSAGE =~ /.*run-ci.*/i
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
 stages:
-  - init
   - validate
   - plan
-  - deploy
+  - apply
   - destroy
-init:
-  stage: init
-  only:
-    - main
-    - merge_requests
+
+before_script:
+  - cd ${TF_ROOT}
+  - terraform init -upgrade -reconfigure
+
+# ========================
+# VALIDATION
+# ========================
+
+fmt:
+  stage: validate
   script:
-    - gitlab-terraform init
+    - terraform fmt -check -recursive
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
 validate:
   stage: validate
-  only:
-    - main
-    - merge_requests
   script:
-    - gitlab-terraform validate
+    - terraform validate
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ========================
+# PLAN
+# ========================
+
 plan:
   stage: plan
-  only:
-    - main
-    - merge_requests
   script:
-    - gitlab-terraform plan -var-file tfvars.hcl
-    - gitlab-terraform plan-json
+    - terraform plan -var-file=${CI_PROJECT_DIR}/infra/src/tfvars.json -out=plan.bin -input=false
+    - terraform show -json plan.bin > plan.json
+    - terraform show plan.bin > plan.txt
   artifacts:
-    name: plan
     paths:
-      - ${TF_ROOT}/plan.cache
+      - ${TF_ROOT}/plan.bin
+      - ${TF_ROOT}/plan.txt
+      - ${TF_ROOT}/plan.json
     reports:
       terraform: ${TF_ROOT}/plan.json
-deploy:
-  only:
-    - main
-  stage: deploy
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ========================
+# APPLY
+# ========================
+
+apply:
+  stage: apply
+  script:
+    - terraform apply -input=false plan.bin
+    - terraform output -raw kube_config > kubeconfig 2>/dev/null || true
   environment:
     name: production
-  script:
-    - gitlab-terraform apply
-  dependencies:
-    - plan
   artifacts:
     paths:
-      - ${TF_ROOT}/target/kubeconfig.yaml
+      - ${TF_ROOT}/kubeconfig
     expire_in: never
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  needs:
+    - plan
+
+# ========================
+# DESTROY
+# ========================
+
 destroy:
-  only:
-    - main
   stage: destroy
+  script:
+    - terraform destroy -var-file=${CI_PROJECT_DIR}/infra/src/tfvars.json -auto-approve
   environment:
     name: production
-  script:
-    - gitlab-terraform destroy -var-file tfvars.hcl
-  dependencies:
-    - plan
-  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
