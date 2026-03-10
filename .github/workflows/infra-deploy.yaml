@@ -61,7 +61,7 @@ jobs:
         uses: gruntwork-io/terragrunt-action@v3
         with:
           tg_version: ${{ env.tg_version }}
-          tg_command: "hclfmt --check"
+          tg_command: "hcl fmt --check"
           tg_dir: ${{ env.tf_working_dir }}
           tg_comment: "0"
         env:
