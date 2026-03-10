@@ -1,11 +1,3 @@
-variable "create" {
-  description = "Controls if resources should be created (affects nearly all resources)"
-  type        = bool
-  default     = true
-}
-
-
-
 variable "prefix_separator" {
   description = "The separator to use between the prefix and the generated timestamp for resource names"
   type        = string
@@ -23,8 +15,20 @@ variable "cluster_name" {
 }
 
 variable "cluster_version" {
-  description = "Kubernetes `<major>.<minor>` version to use for the EKS cluster (i.e.: `1.27`)"
+  description = "Kubernetes `<major>.<minor>` version to use for the EKS cluster (i.e.: `1.33`)"
   type        = string
+  default     = null
+}
+
+variable "deletion_protection" {
+  description = "Whether to enable deletion protection for the cluster. When enabled, the cluster cannot be deleted unless deletion protection is first disabled"
+  type        = bool
+  default     = null
+}
+
+variable "force_update_version" {
+  description = "Force version update by overriding upgrade-blocking readiness checks when updating a cluster"
+  type        = bool
   default     = null
 }
 
@@ -38,6 +42,54 @@ variable "authentication_mode" {
   description = "The authentication mode for the cluster. Valid values are `CONFIG_MAP`, `API` or `API_AND_CONFIG_MAP`"
   type        = string
   default     = "API_AND_CONFIG_MAP"
+}
+
+variable "upgrade_policy" {
+  description = "Configuration block for the cluster upgrade policy"
+  type = object({
+    support_type = optional(string)
+  })
+  default = null
+}
+
+variable "compute_config" {
+  description = "Configuration block for the cluster compute configuration (EKS Auto Mode)"
+  type = object({
+    enabled       = optional(bool, false)
+    node_pools    = optional(list(string))
+    node_role_arn = optional(string)
+  })
+  default = null
+}
+
+variable "control_plane_scaling_config" {
+  description = "Configuration block for the cluster control plane scaling"
+  type = object({
+    max_size = optional(number)
+    min_size = optional(number)
+  })
+  default = null
+}
+
+variable "remote_network_config" {
+  description = "Configuration block for the cluster remote network configuration"
+  type = object({
+    remote_node_networks = optional(list(object({
+      cidrs = optional(list(string))
+    })))
+    remote_pod_networks = optional(list(object({
+      cidrs = optional(list(string))
+    })))
+  })
+  default = null
+}
+
+variable "zonal_shift_config" {
+  description = "Configuration block for the cluster zonal shift"
+  type = object({
+    enabled = optional(bool)
+  })
+  default = null
 }
 
 variable "cluster_additional_security_group_ids" {
@@ -174,6 +226,12 @@ variable "enable_kms_key_rotation" {
   description = "Specifies whether key rotation is enabled"
   type        = bool
   default     = true
+}
+
+variable "kms_key_rotation_period_in_days" {
+  description = "Custom period of time between each key rotation date. If you specify a value, it must be between `90` and `2560`, inclusive. If you do not specify a value, it defaults to `365`"
+  type        = number
+  default     = null
 }
 
 variable "kms_key_enable_default_policy" {
@@ -372,12 +430,6 @@ variable "node_security_group_tags" {
   default     = {}
 }
 
-variable "enable_efa_support" {
-  description = "Determines whether to enable Elastic Fabric Adapter (EFA) support"
-  type        = bool
-  default     = false
-}
-
 ################################################################################
 # IRSA
 ################################################################################
@@ -527,17 +579,79 @@ variable "cluster_identity_providers" {
 }
 
 ################################################################################
+# EKS Auto Mode
+################################################################################
+
+variable "enable_auto_mode_custom_tags" {
+  description = "Determines whether to enable permissions for custom tags resources created by EKS Auto Mode"
+  type        = bool
+  default     = true
+}
+
+variable "create_auto_mode_iam_resources" {
+  description = "Determines whether to create/attach IAM resources for EKS Auto Mode"
+  type        = bool
+  default     = false
+}
+
+################################################################################
+# EKS Auto Mode Node IAM Role
+################################################################################
+
+variable "create_node_iam_role" {
+  description = "Determines whether an EKS Auto node IAM role is created"
+  type        = bool
+  default     = true
+}
+
+variable "node_iam_role_name" {
+  description = "Name to use on the EKS Auto node IAM role created"
+  type        = string
+  default     = null
+}
+
+variable "node_iam_role_use_name_prefix" {
+  description = "Determines whether the EKS Auto node IAM role name (`node_iam_role_name`) is used as a prefix"
+  type        = bool
+  default     = true
+}
+
+variable "node_iam_role_path" {
+  description = "EKS Auto node IAM role path"
+  type        = string
+  default     = null
+}
+
+variable "node_iam_role_description" {
+  description = "Description of the EKS Auto node IAM role"
+  type        = string
+  default     = null
+}
+
+variable "node_iam_role_permissions_boundary" {
+  description = "ARN of the policy that is used to set the permissions boundary for the EKS Auto node IAM role"
+  type        = string
+  default     = null
+}
+
+variable "node_iam_role_additional_policies" {
+  description = "Additional policies to be added to the EKS Auto node IAM role"
+  type        = map(string)
+  default     = {}
+}
+
+variable "node_iam_role_tags" {
+  description = "A map of additional tags to add to the EKS Auto node IAM role created"
+  type        = map(string)
+  default     = {}
+}
+
+################################################################################
 # Fargate
 ################################################################################
 
 variable "fargate_profiles" {
   description = "Map of Fargate Profile definitions to create"
-  type        = any
-  default     = {}
-}
-
-variable "fargate_profile_defaults" {
-  description = "Map of Fargate Profile default configurations"
   type        = any
   default     = {}
 }
@@ -552,24 +666,12 @@ variable "self_managed_node_groups" {
   default     = {}
 }
 
-variable "self_managed_node_group_defaults" {
-  description = "Map of self-managed node group default configurations"
-  type        = any
-  default     = {}
-}
-
 ################################################################################
 # EKS Managed Node Group
 ################################################################################
 
 variable "eks_managed_node_groups" {
   description = "Map of EKS managed node group definitions to create"
-  type        = any
-  default     = {}
-}
-
-variable "eks_managed_node_group_defaults" {
-  description = "Map of EKS managed node group default configurations"
   type        = any
   default     = {}
 }

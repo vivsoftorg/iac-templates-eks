@@ -1,10 +1,10 @@
 module "vpc" {
-  count  = var.create_vpc ? 1 : 0
-  azs    = local.azs
-  name   = var.cluster_name
-  source = "./modules/terraform-aws-vpc"
-  // source  = "terraform-aws-modules/vpc/aws"
-  // version = "v5.7.1"
+  count = var.create_vpc ? 1 : 0
+  azs   = local.azs
+  name  = var.cluster_name
+  # Using terraform-aws-modules/vpc/aws version 6.6.0
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "6.6.0"
 
   public_subnet_tags = {
     "kubernetes.io/cluster/${local.name}" = "shared"
@@ -39,12 +39,15 @@ module "vpc" {
   ipv6_netmask_length                  = var.ipv6_netmask_length
   ipv6_cidr_block_network_border_group = var.ipv6_cidr_block_network_border_group
   vpc_tags                             = var.vpc_tags
+  vpc_block_public_access_options      = var.vpc_block_public_access_options
+  vpc_block_public_access_exclusions   = var.vpc_block_public_access_exclusions
   enable_dhcp_options                  = var.enable_dhcp_options
   dhcp_options_domain_name             = var.dhcp_options_domain_name
   dhcp_options_domain_name_servers     = var.dhcp_options_domain_name_servers
   dhcp_options_ntp_servers             = var.dhcp_options_ntp_servers
   dhcp_options_netbios_name_servers    = var.dhcp_options_netbios_name_servers
   dhcp_options_netbios_node_type       = var.dhcp_options_netbios_node_type
+  dhcp_options_ipv6_address_preferred_lease_time = var.dhcp_options_ipv6_address_preferred_lease_time
   dhcp_options_tags                    = var.dhcp_options_tags
   // public_subnets=var.public_subnets
   public_subnet_assign_ipv6_address_on_creation                = var.public_subnet_assign_ipv6_address_on_creation
@@ -58,8 +61,9 @@ module "vpc" {
   public_subnet_names                                          = var.public_subnet_names
   public_subnet_suffix                                         = var.public_subnet_suffix
   // public_subnet_tags=var.public_subnet_tags
-  public_subnet_tags_per_az    = var.public_subnet_tags_per_az
-  public_route_table_tags      = var.public_route_table_tags
+  public_subnet_tags_per_az            = var.public_subnet_tags_per_az
+  public_route_table_tags              = var.public_route_table_tags
+  create_multiple_public_route_tables  = var.create_multiple_public_route_tables
   public_dedicated_network_acl = var.public_dedicated_network_acl
   public_inbound_acl_rules     = var.public_inbound_acl_rules
   public_outbound_acl_rules    = var.public_outbound_acl_rules
@@ -75,8 +79,9 @@ module "vpc" {
   private_subnet_names                                          = var.private_subnet_names
   private_subnet_suffix                                         = var.private_subnet_suffix
   // private_subnet_tags=var.private_subnet_tags
-  private_subnet_tags_per_az    = var.private_subnet_tags_per_az
-  private_route_table_tags      = var.private_route_table_tags
+  private_subnet_tags_per_az            = var.private_subnet_tags_per_az
+  private_route_table_tags              = var.private_route_table_tags
+  create_private_nat_gateway_route      = var.create_private_nat_gateway_route
   private_dedicated_network_acl = var.private_dedicated_network_acl
   private_inbound_acl_rules     = var.private_inbound_acl_rules
   private_outbound_acl_rules    = var.private_outbound_acl_rules
@@ -222,6 +227,11 @@ module "vpc" {
   default_route_table_routes                                        = var.default_route_table_routes
   default_route_table_tags                                          = var.default_route_table_tags
   enable_flow_log                                                   = var.enable_flow_log
+  vpc_flow_log_iam_role_name                                        = var.vpc_flow_log_iam_role_name
+  vpc_flow_log_iam_role_path                                        = var.vpc_flow_log_iam_role_path
+  vpc_flow_log_iam_role_use_name_prefix                             = var.vpc_flow_log_iam_role_use_name_prefix
+  vpc_flow_log_iam_policy_name                                      = var.vpc_flow_log_iam_policy_name
+  vpc_flow_log_iam_policy_use_name_prefix                           = var.vpc_flow_log_iam_policy_use_name_prefix
   vpc_flow_log_permissions_boundary                                 = var.vpc_flow_log_permissions_boundary
   flow_log_max_aggregation_interval                                 = var.flow_log_max_aggregation_interval
   flow_log_traffic_type                                             = var.flow_log_traffic_type
@@ -235,6 +245,7 @@ module "vpc" {
   vpc_flow_log_tags                                                 = var.vpc_flow_log_tags
   create_flow_log_cloudwatch_log_group                              = var.create_flow_log_cloudwatch_log_group
   create_flow_log_cloudwatch_iam_role                               = var.create_flow_log_cloudwatch_iam_role
+  flow_log_cloudwatch_iam_role_conditions                           = var.flow_log_cloudwatch_iam_role_conditions
   flow_log_cloudwatch_iam_role_arn                                  = var.flow_log_cloudwatch_iam_role_arn
   flow_log_cloudwatch_log_group_name_prefix                         = var.flow_log_cloudwatch_log_group_name_prefix
   flow_log_cloudwatch_log_group_name_suffix                         = var.flow_log_cloudwatch_log_group_name_suffix
