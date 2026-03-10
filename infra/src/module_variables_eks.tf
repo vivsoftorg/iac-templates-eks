@@ -63,10 +63,9 @@ variable "compute_config" {
 }
 
 variable "control_plane_scaling_config" {
-  description = "Configuration block for the cluster control plane scaling"
+  description = "Configuration block for the EKS Provisioned Control Plane scaling tier. Valid values for tier are `standard`, `tier-xl`, `tier-2xl`, and `tier-4xl`"
   type = object({
-    max_size = optional(number)
-    min_size = optional(number)
+    tier = string
   })
   default = null
 }
@@ -74,12 +73,12 @@ variable "control_plane_scaling_config" {
 variable "remote_network_config" {
   description = "Configuration block for the cluster remote network configuration"
   type = object({
-    remote_node_networks = optional(list(object({
+    remote_node_networks = object({
       cidrs = optional(list(string))
-    })))
-    remote_pod_networks = optional(list(object({
+    })
+    remote_pod_networks = optional(object({
       cidrs = optional(list(string))
-    })))
+    }))
   })
   default = null
 }
