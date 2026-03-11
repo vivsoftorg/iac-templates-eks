@@ -13,7 +13,7 @@ cluster_version                  = "1.32"
 cluster_enabled_log_types         = ["audit", "api", "authenticator"]
 authentication_mode               = "API"
 cluster_endpoint_private_access   = true
-cluster_endpoint_public_access   = false
+cluster_endpoint_public_access   = true
 
 deletion_protection = false
 

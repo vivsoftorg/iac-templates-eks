@@ -1,24 +1,24 @@
 {
   "create_vpc": true,
   "vpc_cidr": "10.0.0.0/16",
-
-  "cluster_version": "1.32",
-  "cluster_enabled_log_types": ["audit", "api", "authenticator"],
+  "cluster_version": "1.34",
+  "cluster_enabled_log_types": [
+    "audit",
+    "api",
+    "authenticator"
+  ],
   "authentication_mode": "API",
   "cluster_endpoint_private_access": true,
-  "cluster_endpoint_public_access": false,
-
+  "cluster_endpoint_public_access": true,
   "deletion_protection": false,
-
   "eks_node_groups_min_size": 1,
   "eks_node_groups_max_size": 5,
   "eks_node_groups_desired_size": 1,
-
   "enable_nat_gateway": true,
   "single_nat_gateway": true,
-
-  "instance_types": ["t3.large"],
-
+  "instance_types": [
+    "t3.large"
+  ],
   "create_registry1_mirror": false,
   "registry1_mirror_proxy_address": "http://44.210.192.97:5000"
 }
