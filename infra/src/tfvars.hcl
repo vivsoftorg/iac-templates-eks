@@ -9,11 +9,10 @@ create_vpc = true
 vpc_cidr = "10.0.0.0/16"
 
 # EKS Cluster Configuration
-cluster_version                  = "1.32"
-cluster_enabled_log_types         = ["audit", "api", "authenticator"]
-authentication_mode               = "API"
+cluster_version                  = "1.34"
 cluster_endpoint_private_access   = true
 cluster_endpoint_public_access   = true
+authentication_mode               = "API"
 
 deletion_protection = false
 

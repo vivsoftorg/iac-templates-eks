@@ -2,6 +2,13 @@
   "cluster_name": "enbuild-eks",
   "create_vpc": true,
   "vpc_cidr": "10.0.0.0/16",
+  "commnt": "The vpc_id and subnet_ids are required when create_vpc is set to false. If create_vpc is true, these values will be ignored and a new VPC will be created for the EKS cluster.",
+  "vpc_id": "vpc-xxx",
+  "subnet_ids": [
+    "subnet-xxx1",
+    "subnet-xxx2",
+    "subnet-xxx3"
+  ],
   "cluster_version": "1.34",
   "cluster_enabled_log_types": [
     "audit",
