@@ -16,7 +16,7 @@ This is a **template repository** that provisions an AWS EKS cluster using Terra
 
 | File | Role |
 |---|---|
-| `infra/src/eks.tf` | EKS module call + SSH key + SOPS IAM policy |
+/eks.tf`| `infra/src | EKS module call + SSH key + SOPS IAM policy + EBS CSI Pod Identity + Dynamic access entry |
 | `infra/src/vpc.tf` | VPC module call |
 | `infra/src/main.tf` | Locals, data sources, mirror proxy config |
 | `infra/src/providers.tf` | AWS + Kubernetes provider configuration |
@@ -165,6 +165,61 @@ infra/src/variables.tf + module_variables_*.tf (Terraform variables) → infra/s
 - Set `AWS_DEFAULT_REGION` to `us-gov-west-1` or `us-gov-east-1`
 - Verify EKS version availability before deploying (GovCloud lags ~3–6 months)
 - In air-gapped environments, mirror Terraform modules or revert to local paths
+
+---
+
+## EBS CSI Driver with Pod Identity
+
+The EBS CSI driver uses **EKS Pod Identity** (not IRSA or EC2 IMDS) for IAM credentials. This is configured in `infra/src/eks.tf`:
+
+```hcl
+# Pod Identity module creates IAM role with EBS CSI policy
+module "aws_ebs_csi_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "~> 2.7"
+
+  attach_aws_ebs_csi_policy = true
+
+  associations = {
+    ebs-csi = {
+      cluster_name    = var.cluster_name
+      namespace       = "kube-system"
+      service_account = "ebs-csi-controller-sa"
+    }
+  }
+}
+
+# Addon uses Pod Identity role (not EC2 IMDS)
+addons = {
+  aws-ebs-csi-driver = {
+    most_recent              = true
+    service_account_role_arn = module.aws_ebs_csi_pod_identity.iam_role_arn
+  }
+}
+```
+
+**Why Pod Identity?** Pod Identity allows pods to get IAM credentials without relying on EC2 Instance Metadata Service (IMDS), which is not accessible from private subnets without additional configuration.
+
+---
+
+## Dynamic Cluster Access
+
+The deploying user's ARN is automatically added as cluster admin via EKS Access Entries:
+
+```hcl
+access_entries = merge(
+  var.access_entries,
+  {
+    "deployer-admin" = {
+      principal_arn     = data.aws_caller_identity.current.arn
+      kubernetes_groups = []
+      access_policy    = "AmazonEKSAdminPolicy"
+    }
+  }
+)
+```
+
+This enables `kubectl` access immediately after deployment without manual IAM configuration. Additional access entries can be added via `var.access_entries` in environment config.
 
 ---
 
