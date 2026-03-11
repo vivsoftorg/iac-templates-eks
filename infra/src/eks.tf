@@ -79,7 +79,8 @@ module "eks" {
       most_recent = true
     }
     aws-ebs-csi-driver = {
-      most_recent = true
+      most_recent              = true
+      service_account_role_arn = module.aws_ebs_csi_pod_identity.iam_role_arn
     }
     eks-pod-identity-agent = {
       most_recent = true
@@ -96,7 +97,7 @@ module "eks" {
       capacity_type              = "ON_DEMAND"
       key_name                   = aws_key_pair.eks-node.key_name
       enable_bootstrap_user_data = false
-      pre_bootstrap_user_data    = ""
+      pre_bootstrap_user_data    = local.mirror_proxy_config
       use_custom_launch_template = false
       disk_size                  = 100
 
@@ -109,39 +110,61 @@ module "eks" {
   }
   tags                                     = local.tags
   create_kms_key                           = true
-  kms_key_description                      = "KMS kye for ENBUILD managed EKS cluster"
+  kms_key_description                      = "KMS key for ENBUILD managed EKS cluster"
   enable_cluster_creator_admin_permissions = false
   kms_key_owners                           = ["arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:root", data.aws_caller_identity.current.arn]
   kms_key_administrators                   = ["arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:root", data.aws_caller_identity.current.arn]
   kms_key_users                            = ["arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:root", data.aws_caller_identity.current.arn]
-  // Default vars from module
-  prefix_separator                             = var.prefix_separator
-  name                                         = var.cluster_name
-  kubernetes_version                           = var.cluster_version
-  enabled_log_types                            = var.cluster_enabled_log_types
-  deletion_protection                          = var.deletion_protection
-  force_update_version                         = var.force_update_version
-  authentication_mode                          = var.authentication_mode
-  upgrade_policy                               = var.upgrade_policy
-  compute_config                               = var.compute_config
-  control_plane_scaling_config                 = var.control_plane_scaling_config
-  remote_network_config                        = var.remote_network_config
-  zonal_shift_config                           = var.zonal_shift_config
-  additional_security_group_ids                = var.cluster_additional_security_group_ids
-  control_plane_subnet_ids                     = var.control_plane_subnet_ids
-  endpoint_private_access                      = var.cluster_endpoint_private_access
-  endpoint_public_access                       = var.cluster_endpoint_public_access
-  endpoint_public_access_cidrs                 = var.cluster_endpoint_public_access_cidrs
-  ip_family                                    = var.cluster_ip_family
-  service_ipv4_cidr                            = var.cluster_service_ipv4_cidr
-  service_ipv6_cidr                            = var.cluster_service_ipv6_cidr
-  outpost_config                               = var.outpost_config
-  encryption_config                            = var.cluster_encryption_config
-  attach_encryption_policy                     = var.attach_cluster_encryption_policy
-  cluster_tags                                 = var.cluster_tags
-  create_primary_security_group_tags           = var.create_cluster_primary_security_group_tags
-  timeouts                                     = var.cluster_timeouts
-  access_entries                               = var.access_entries
+  prefix_separator                         = var.prefix_separator
+  name                                     = var.cluster_name
+  kubernetes_version                       = var.cluster_version
+  enabled_log_types                        = var.cluster_enabled_log_types
+  deletion_protection                      = var.deletion_protection
+  force_update_version                     = var.force_update_version
+  authentication_mode                      = var.authentication_mode
+  upgrade_policy                           = var.upgrade_policy
+  compute_config                           = var.compute_config
+  control_plane_scaling_config             = var.control_plane_scaling_config
+  remote_network_config                    = var.remote_network_config
+  zonal_shift_config                       = var.zonal_shift_config
+  additional_security_group_ids            = var.cluster_additional_security_group_ids
+  control_plane_subnet_ids                 = var.control_plane_subnet_ids
+  endpoint_private_access                  = var.cluster_endpoint_private_access
+  endpoint_public_access                   = var.cluster_endpoint_public_access
+  endpoint_public_access_cidrs             = var.cluster_endpoint_public_access_cidrs
+  ip_family                                = var.cluster_ip_family
+  service_ipv4_cidr                        = var.cluster_service_ipv4_cidr
+  service_ipv6_cidr                        = var.cluster_service_ipv6_cidr
+  outpost_config                           = var.outpost_config
+  encryption_config                        = var.cluster_encryption_config
+  attach_encryption_policy                 = var.attach_cluster_encryption_policy
+  cluster_tags                             = var.cluster_tags
+  create_primary_security_group_tags       = var.create_cluster_primary_security_group_tags
+  timeouts                                 = var.cluster_timeouts
+  access_entries = merge(
+    var.access_entries,
+    {
+      "deployer-admin" = {
+        principal_arn = data.aws_caller_identity.current.arn
+        type          = "STANDARD"
+        user_name     = local.username[0]
+        policy_associations = {
+          clusteradmin = {
+            policy_arn = "arn:${data.aws_partition.current.partition}:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+            access_scope = {
+              type = "cluster"
+            }
+          }
+          admin = {
+            policy_arn = "arn:${data.aws_partition.current.partition}:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+            access_scope = {
+              type = "cluster"
+            }
+          }
+        }
+      }
+    }
+  )
   kms_key_deletion_window_in_days              = var.kms_key_deletion_window_in_days
   enable_kms_key_rotation                      = var.enable_kms_key_rotation
   kms_key_rotation_period_in_days              = var.kms_key_rotation_period_in_days

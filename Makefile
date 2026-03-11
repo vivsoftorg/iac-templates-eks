@@ -22,6 +22,7 @@ set_env:
 # Terragrunt auto-creates the S3 bucket and DynamoDB lock table via root.hcl.
 # This target ensures AWS credentials are set before any remote operations.
 create_backend: set_env
+	cd infra/environments/$(ENVIRONMENT) && source $(CURDIR)/.envrc && terragrunt backend bootstrap --non-interactive
 
 init: create_backend
 	cd infra/environments/$(ENVIRONMENT) && source $(CURDIR)/.envrc && terragrunt init -reconfigure
