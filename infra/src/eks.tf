@@ -244,3 +244,35 @@ resource "null_resource" "generate_kubeconfig" {
     EOT
   }
 }
+
+# Flux IAM Role for EKS Pod Identity
+resource "aws_iam_role" "flux" {
+  count = var.create_flux_iam_role ? 1 : 0
+
+  name                 = var.flux_iam_role_name != null ? var.flux_iam_role_name : "${var.cluster_name}-flux-role"
+  path                 = var.flux_iam_role_path
+  description          = var.flux_iam_role_description
+  permissions_boundary = var.flux_iam_role_permissions_boundary
+  tags                 = merge(var.flux_iam_role_tags, local.tags)
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = ["sts:AssumeRole", "sts:TagSession"]
+        Effect = "Allow"
+        Principal = {
+          Service = "pods.eks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy_attachment" "flux" {
+  count = var.create_flux_iam_role ? 1 : 0
+
+  role       = aws_iam_role.flux[0].name
+  policy_arn = aws_iam_policy.sops.arn
+}

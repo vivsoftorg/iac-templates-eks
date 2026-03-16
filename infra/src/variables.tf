@@ -51,3 +51,43 @@ variable "registry1_mirror_proxy_address" {
   type        = string
   default     = "http://44.210.192.97:5000"
 }
+
+################################################################################
+# Flux IAM Role (for EKS Pod Identity)
+################################################################################
+
+variable "create_flux_iam_role" {
+  description = "Controls whether to create a Flux IAM role with EKS Pod Identity trust"
+  type        = bool
+  default     = false
+}
+
+variable "flux_iam_role_name" {
+  description = "Name of the Flux IAM role"
+  type        = string
+  default     = null
+}
+
+variable "flux_iam_role_path" {
+  description = "Path for the Flux IAM role"
+  type        = string
+  default     = null
+}
+
+variable "flux_iam_role_description" {
+  description = "Description of the Flux IAM role"
+  type        = string
+  default     = "IAM role for Flux GitOps controller with EKS Pod Identity"
+}
+
+variable "flux_iam_role_permissions_boundary" {
+  description = "ARN of the policy that is used to set the permissions boundary for the Flux IAM role"
+  type        = string
+  default     = null
+}
+
+variable "flux_iam_role_tags" {
+  description = "A map of additional tags to add to the Flux IAM role"
+  type        = map(string)
+  default     = {}
+}

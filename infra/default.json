@@ -26,6 +26,7 @@
   "instance_types": [
     "t3.large"
   ],
+  "create_flux_iam_role": true,
   "create_registry1_mirror": false,
   "registry1_mirror_proxy_address": "http://44.210.192.97:5000"
 }
