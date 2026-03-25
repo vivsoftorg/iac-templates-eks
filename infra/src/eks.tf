@@ -13,14 +13,6 @@ module "aws_ebs_csi_pod_identity" {
 
   attach_aws_ebs_csi_policy = true
 
-  associations = {
-    ebs-csi = {
-      cluster_name    = var.cluster_name
-      namespace       = "kube-system"
-      service_account = "ebs-csi-controller-sa"
-    }
-  }
-
   tags = local.tags
 }
 
@@ -84,7 +76,12 @@ module "eks" {
     aws-ebs-csi-driver = {
       most_recent    = true
       before_compute = true
-      # service_account_role_arn = module.aws_ebs_csi_pod_identity.iam_role_arn
+      pod_identity_association = [
+        {
+          role_arn        = module.aws_ebs_csi_pod_identity.iam_role_arn
+          service_account = "ebs-csi-controller-sa"
+        }
+      ]
     }
   }
 
