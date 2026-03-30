@@ -6,6 +6,14 @@ output "eks" {
   value = module.eks
 }
 
+output "cluster_name" {
+  value = module.eks.cluster_name
+}
+
+output "cluster_region" {
+  value = data.aws_region.current.id
+}
+
 output "bigbang_sops_config" {
   value = <<SOPS
   ---

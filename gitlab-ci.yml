@@ -87,7 +87,7 @@ apply:
   stage: apply
   script:
     - terraform apply -input=false plan.bin
-    - terraform output -raw kube_config > kubeconfig 2>/dev/null || true
+    - aws eks update-kubeconfig --name "$(terraform output -raw cluster_name)" --region "$(terraform output -raw cluster_region)" --dry-run > kubeconfig
   environment:
     name: production
   artifacts:
